@@ -17,7 +17,7 @@ class Application < Sinatra::Base
 
   get '/' do
     repo = MessageRepository.new
-    @messages = repo.all 
+    @messages = repo.all.sort_by(&:created_at).reverse
     return erb(:index)
   end
 
@@ -30,37 +30,30 @@ class Application < Sinatra::Base
     title = params[:title]
     content = params[:content]
     date = params[:date]
-    tags = params[:tags]
-    user_id = params[:user_id]
 
     repo = MessageRepository.new
     new_message = Message.new
 
     new_message.title = params[:title]
     new_message.content = params[:content]
-    new_message.date = params[:date]
     new_message.tags = params[:tags]
-    new_message.user_id = params[:user_id].to_i
   
     repo.create(new_message)
 
-    redirect "/"
+    redirect '/'
   end
 
   def invalid_request_parameters?
     # Are the params nil?
     return true if  title = params[:title] == nil ||
                     content = params[:content] == nil ||
-                    date = params[:date] == nil ||
-                    tags = params[:tags] == nil ||
-                    user_id = params[:user_id] == nil
+                    tags = params[:tags] == nil
   
     # Are they empty strings?
     return true if  title = params[:title] == '' ||
                     content = params[:content] == '' ||
-                    date = params[:date] == '' ||
-                    tags = params[:tags] == '' ||
-                    user_id = params[:user_id] == ''
+                    tags = params[:tags] == ''
+
     return false
   end
 end

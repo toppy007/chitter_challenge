@@ -360,7 +360,7 @@ number of tables 2 (users) & (messages)
 # (in spec/user_repository_spec.rb)
 # (in spec/message_repository_spec.rb)
 
-# 1
+# 1 def all
 repo = UserRepository.new
 user = repo.all
 
@@ -370,44 +370,21 @@ user[0].email # => chris_@hotmail.com
 user[0].password # => 1234567890abc
 user[0].username # => toppy
 
-# 2
+# 2 def create
 repo = UserRepository.new
 
 new_user = User.new
-new_user.name = 'pencil'
-new_user.price = 1.99
-new_user.quantity = 1
+new_user.email = 'andy_@gamil.com'
+new_user.password = '1111abcde' 
+new_user.username = 'andy'
 
 repo.create(item)
-create_item = repo.all
+added_user = repo.all
 
-create_item.last.name # => pencil
-create_item.last.price # => 1.99
+added_user.last.email # => andy_@gmail.com
+added_user.last.username # => 'andy'
 
-# 4
-repo = ItemRepository.new
-
-delete_id = 1
-repo.delete(delete_id)
-
-delete_item = repo.all
-delete_item.length # => 1
-delete_item.first.id # => 2
-
-# 5
-repo = ItemRepository.new
-
-item = repo.find(1)
-
-item.name = 'steal hammer'
-item.price = 8.99
-
-repo.update(item)
-updated_item = repo.find(1)
-
-updated_item.name # => steal hammer
-updated_item.price # => 8.99
-
+item
 ```
 ## 7. Reload the SQL seeds before each test run
 
@@ -416,11 +393,12 @@ updated_item.price # => 8.99
 number of tables 2 (items) & (orders)
 
 ```ruby
-# file: spec/item_repository_spec.rb
+
+# file: spec/user_repository_spec.rb
 
 def reset_order_table
-    seed_sql = File.read('spec/seeds_shop_manager_test.sql')
-    connection = PG.connect({ host: '127.0.0.1', dbname: 'shop_manager_test' })
+    seed_sql = File.read('spec/seeds_chitter_challenge_test.sql')
+    connection = PG.connect({ host: '127.0.0.1', dbname: 'chitter_challenge_test' })
     connection.exec(seed_sql)
 end
   
@@ -491,6 +469,7 @@ class Application < Sinatra::Base
   end
 end
 ```
+
 ## "route" or "route block".
 
 The Ruby block between the do and end associated with a method and path is called a "route" or "route block". The code in this block is executed only is the received request matches the method and path.

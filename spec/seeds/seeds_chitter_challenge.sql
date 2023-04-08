@@ -13,8 +13,8 @@ CREATE TABLE messages (
   id SERIAL PRIMARY KEY,
   title text,
   content text,
-  date date,
   tags int[],
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 -- The foreign key name is always {other_table_singular}_id
   user_id int,
   constraint fk_user foreign key(user_id)

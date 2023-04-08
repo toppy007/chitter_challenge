@@ -24,7 +24,6 @@ describe Application do
             expect(response.status).to eq(200)
             expect(response.body).to include('title: paired programming')
             expect(response.body).to include('content: learning to pair program')
-            expect(response.body).to include('date: 1999-01-08')
             expect(response.body).to include('tags: {2,3}')
         end
     end
@@ -35,7 +34,6 @@ describe Application do
             '/',
             title: 'Learing HTML',
             content: 'its a easy to get muddled up',
-            date: '2023-04-05',
             tags: '{2,3}',
             user_id: 1
           )
@@ -49,7 +47,6 @@ describe Application do
                 '/',
                 title: '',
                 content: '',
-                date: '',
                 tags: '',
                 user_id: ''
               )

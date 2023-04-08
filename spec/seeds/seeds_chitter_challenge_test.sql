@@ -13,14 +13,12 @@ TRUNCATE TABLE messages RESTART IDENTITY;
 INSERT INTO messages (
     title, 
     content, 
-    date,
     tags, 
     user_id
     ) 
 VALUES (
     'paired programming', 
     'learning to pair program',
-    '08-Jan-1999',
     ARRAY [2, 3],
     1
     );
@@ -28,14 +26,12 @@ VALUES (
 INSERT INTO messages (
     title, 
     content, 
-    date,
     tags, 
     user_id
     ) 
 VALUES (
     'TDD learning', 
     'methods to writing a program',
-    '08-Jan-2023',
     ARRAY [1],
     2
     );
@@ -43,14 +39,12 @@ VALUES (
 INSERT INTO messages (
     title, 
     content, 
-    date,
     tags, 
     user_id
     ) 
 VALUES (
     'OOP', 
     'learning object orintated programing',
-    '08-Jan-2020',
     ARRAY [2, 3],
     1
     );
