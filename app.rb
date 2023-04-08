@@ -1,23 +1,66 @@
+# file: app.rb
 
-require 'sinatra/base'
-require 'sinatra/reloader'
+require 'sinatra'
+require "sinatra/reloader"
+require_relative 'lib/database_connection'
+require_relative 'lib/user_repository'
+require_relative 'lib/message_repository'
+
+DatabaseConnection.connect
 
 class Application < Sinatra::Base
-  # This allows the app code to refresh
-  # without having to restart the server.
   configure :development do
     register Sinatra::Reloader
+    also_reload 'lib/user_repository'
+    also_reload 'lib/message_repository'
   end
 
-    # Declares a route that responds to a request with:
-  #  - a GET method
-  #  - the path /
   get '/' do
-    # The code here is executed when a request is received and we need to 
-    # send a response. 
+    repo = MessageRepository.new
+    @messages = repo.all 
+    return erb(:index)
+  end
 
-    # We can return a string which will be used as the response content.
-    # Unless specified, the response status code will be 200 (OK).
-    return 'Some response data'
+  post '/' do
+    if invalid_request_parameters?
+      status 400
+      return ''
+    end
+
+    title = params[:title]
+    content = params[:content]
+    date = params[:date]
+    tags = params[:tags]
+    user_id = params[:user_id]
+
+    repo = MessageRepository.new
+    new_message = Message.new
+
+    new_message.title = params[:title]
+    new_message.content = params[:content]
+    new_message.date = params[:date]
+    new_message.tags = params[:tags]
+    new_message.user_id = params[:user_id].to_i
+  
+    repo.create(new_message)
+
+    redirect "/"
+  end
+
+  def invalid_request_parameters?
+    # Are the params nil?
+    return true if  title = params[:title] == nil ||
+                    content = params[:content] == nil ||
+                    date = params[:date] == nil ||
+                    tags = params[:tags] == nil ||
+                    user_id = params[:user_id] == nil
+  
+    # Are they empty strings?
+    return true if  title = params[:title] == '' ||
+                    content = params[:content] == '' ||
+                    date = params[:date] == '' ||
+                    tags = params[:tags] == '' ||
+                    user_id = params[:user_id] == ''
+    return false
   end
 end

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            h1 {text-align: center;}
+            p {text-align: center;}
+        </style>
+    </head>
+    <body>
+        <h1 style="font-family:helvetica">Welcome to Chitter</h1>
+        <p style="font-family:helvetica">below is the message board</p>
+        
+        <% @messages.each do |message| %>
+            <p style="font-family:helvetica">
+            <p style="font-size:8px">
+                title: <%= message.title %> 
+                content: <%= message.content %> 
+                date: <%= message.date %> 
+                tags: <%= message.tags %> 
+                user_id: <%= message.user_id %> 
+            </p>
+        <% end %>
+
+        <form action="/" method="POST">
+            <label for="title">title:</label>
+            <input type="text" name="title"><br><br>
+
+            <label for="content">content:</label>
+            <input type="text" name="content"><br><br>
+
+            <label for="date">date:</label>
+            <input type="text" name="date"><br><br>
+
+            <label for="tags">tags:</label>
+            <input type="text" name="tags"><br><br>
+
+            <label for="user_id">user_id:</label>
+            <input type="text" name="user_id"><br><br>
+
+            <input type="submit" value="Submit">
+        </form>
+        </p>
+    </body>
+</html>

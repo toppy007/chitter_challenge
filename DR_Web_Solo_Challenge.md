@@ -11,6 +11,10 @@ bundle add rspec
 rspec --init
 mkdir lib
 
+# Database local setup
+bundle add pg
+touch lib/database_connection.rb
+
 # Add the sinatra library, the webrick gem, and rack-test
 bundle add sinatra sinatra-contrib webrick rack-test
 
@@ -23,6 +27,410 @@ touch spec/integration/app_spec.rb
 
 # Create the config.ru file
 touch config.ru
+```
+### DatabaseConnection class
+
+```ruby
+  # file: lib/database_connection.rb
+  require 'pg'
+  # This class is a thin "wrapper" around the
+  # PG library. We'll use it in our project to interact
+  # with the database using SQL.
+  class DatabaseConnection
+    # This method connects to PostgreSQL using the 
+    # PG gem. We connect to 127.0.0.1, and select
+    # the database name given in argument.
+    def self.connect(database_name)
+      @connection = PG.connect({ host: '127.0.0.1', dbname: database_name })
+    end
+    # This method executes an SQL query 
+    # on the database, providing some optional parameters
+    # (you will learn a bit later about when to provide these parameters).
+    def self.exec_params(query, params)
+      if @connection.nil?
+        raise 'DatabaseConnection.exec_params: Cannot run a SQL query as the connection to'\
+        'the database was never opened. Did you make sure to call first the method '\
+        '`DatabaseConnection.connect` in your app.rb file (or in your tests spec_helper.rb)?'
+      end
+      @connection.exec_params(query, params)
+    end
+  end
+```
+### Add connect method to the spec/helper.rb
+
+```ruby
+  # file: spec/spec_helper.rb
+
+  require 'database_connection'
+
+  # Make sure this connects to your test database
+  # (its name should end with '_test')
+  DatabaseConnection.connect('your_database_name_test')
+```
+
+## 1. Design and create the Table
+
+### Extract nouns from the user stories or specification
+
+STRAIGHT UP
+
+As a Maker
+So that I can let people know what I am doing  
+I want to post a message (peep) to chitter
+
+As a maker
+So that I can see what others are saying  
+I want to see all peeps in reverse chronological order
+
+As a Maker
+So that I can better appreciate the context of a peep
+I want to see the time at which it was made
+
+As a Maker
+So that I can post messages on Chitter as me
+I want to sign up for Chitter
+
+HARDER
+
+As a Maker
+So that only I can post messages on Chitter as me
+I want to log in to Chitter
+
+As a Maker
+So that I can avoid others posting messages on Chitter as me
+I want to log out of Chitter
+
+ADVANCED
+
+As a Maker
+So that I can stay constantly tapped in to the shouty box of Chitter
+I want to receive an email if I am tagged in a Peep
+
+```
+(nouns)
+
+email, password, username, 
+content, user_id, title, tags, date
+```
+
+## 2. Infer the Table Name and Columns
+
+Put the different nouns in this table. Replace the example with your own nouns.
+
+| Users                 | Messages            |
+| --------------------- | ------------------  |
+| Email                 | Title, Content, 
+| Password              | Tags, Date
+| Username              | User_id
+
+1. Name of the first table (always plural): `users` 
+
+    Column names: `username`, `password`, `email`
+
+2. Name of the second table (always plural): `messages` 
+
+    Column names: `title`, `content`, `date`, `tags`, `user_id`
+
+## 3. Decide the column types.
+
+```
+Table: users
+id: SERIAL
+email: text
+password: text
+username: text
+
+Table: messages
+id: SERIAL
+title: text
+content: text
+date: date
+tags: text
+user_id: int
+
+```
+
+## 4. Decide on The Tables Relationship
+
+Most of the time, you'll be using a **one-to-many** relationship, and will need a **foreign key** on one of the two tables.
+
+To decide on which one, answer these two questions:
+
+1. Can one ITEMS have many ORDERS? (Yes)
+2. Can one ORDERS have many ITEMS? (No)
+
+You'll then be able to say that:
+
+1. **[USERS] has many [MESSAGES]**
+2. And on the other side, **[MESSAGES] belongs to [USERS]**
+3. In that case, the foreign key is in the table [MESSAGES]
+
+Replace the relevant bits in this example with your own:
+
+## 4. Write the SQL.
+
+```sql
+-- file: seeds_chitter_challenge.sql
+-- Replace the table name, columm names and types.
+-- Create the table without the foreign key first.
+CREATE TABLE users (
+  id SERIAL PRIMARY KEY,
+  email text,
+  password text,
+  username text
+);
+
+-- Then the table with the foreign key first.
+CREATE TABLE messages (
+  id SERIAL PRIMARY KEY,
+  title text,
+  content text,
+  date date,
+  tags text,
+-- The foreign key name is always {other_table_singular}_id
+  user_id int,
+  constraint fk_user_id foreign key(user_id)
+    references users(id)
+    on delete cascade
+);
+
+```
+
+## 5. Create the tables.
+
+```bash
+1 createdb chitter_challenge
+2 createdb chitter_challenge_test
+```
+
+```bash
+psql -h 127.0.0.1 chitter_challenge < seeds_chitter_challenge.sql
+psql -h 127.0.0.1 chitter_challenge_test < seeds_chitter_challenge.sql
+```
+
+## Make test Database for spec file
+
+Test Database Name: seeds_chitter_challenge_test.sql
+
+```sql
+
+--# table names: 'users'
+TRUNCATE TABLE users RESTART IDENTITY CASCADE; 
+
+--cannot truncate a table referenced in a foreign key constraint-- Solution is to as (CASCADE)
+
+INSERT INTO users (email, passwordabc, username) VALUES ('chris_@hotmail.com', '1234567890', 'toppy');
+INSERT INTO users (email, password, username) VALUES ('sunny_@gmail.com', '0987654321abc', 'sunny');
+
+-- table names: 'messages'
+TRUNCATE TABLE messages RESTART IDENTITY; 
+
+INSERT INTO messages (
+    title, 
+    content, 
+    date,
+    tag, 
+    user_id
+    ) 
+VALUES (
+    'paired programming', 
+    'learning to pair program',
+    '08-Jan-1999',
+    'sunny',
+    1
+    );
+
+INSERT INTO messages (
+    title, 
+    content, 
+    date,
+    tag, 
+    user_id
+    ) 
+VALUES (
+    'TDD learning', 
+    'methods to writing a program',
+    '08-Jan-2023',
+    'chris',
+    2
+    );
+```
+## 3. Define the class names
+
+Usually, the Model class name will be the capitalised table name (single instead of plural). The same name is then suffixed by `Repository` for the Repository class name.
+
+```ruby
+Table name: users
+
+# Model class
+# (in lib/user.rb)
+class User
+end
+
+# Repository class
+# (in lib/user_repository.rb)
+class UserRepository
+end
+```
+```ruby
+Table name: messages
+
+# Model class
+# (in lib/message.rb)
+class Message
+end
+
+# Repository class
+# (in lib/message_repository.rb)
+class MessageRepository
+end
+```
+## 4. Implement the Model class
+
+```ruby
+Table name: users
+
+# Model class
+# (in lib/user.rb)
+class User
+  attr_accessor :id, :email, :password, :username
+end
+
+Table name: messages
+
+# Model class
+# (in lib/message.rb)
+class Message
+  attr_accessor :id, :title, :content, :date, :tags, :user_id
+end
+```
+
+## 5. Define the Repository Class interface
+
+#REPEAT BASE ON TABLES MAIN PROGRAM WANTS TO EQUIRY DATA!!!
+
+number of tables 2 (users) & (messages)
+
+```ruby
+Table name: user
+# Repository class
+# (in lib/user_repository.rb)
+class UserRepository
+  def all
+    sql = 'SELECT id, email, password, username FROM users;'
+    result = DatabaseConnection.exec_params(sql,[])
+  end
+
+  def find(id)
+    sql = 'SELECT id, email, password, username FROM WHERE id = $1;'
+    params = [id]
+    result = DatabaseConnection.exec_params(sql, params)
+  end
+
+  def create(user)
+    sql = 'INSERT INTO users (email, password, username) VALUES ($1, $2, $3);'
+    params = [use.email, user.password, user.username]
+    result = DatabaseConnection.exec_params(sql, params)
+  end
+
+  def delete(id)
+    sql = 'DELETE FROM users WHERE (id = $1);'
+    params = [id]
+    result = DatabaseConnection.exec_params(sql, params)
+  end
+
+  def update(update)
+    sql = 'UPDATE user SET (username = $1) WHERE (id = $2);'
+    params = [update.username, update.id]
+    result = DatabaseConnection.exec_pramas(sql, params)
+  end
+end
+```
+
+## 6. Write Test Examples 
+
+Write Ruby code that defines the expected behaviour of the Repository class, following your design from the table written in step 5.
+
+REPEAT BASE ON TABLES MAIN PROGRAM WANTS TO EQUIRY DATA!!!
+
+number of tables 2 (users) & (messages)
+
+
+```ruby
+# (in spec/user_repository_spec.rb)
+# (in spec/message_repository_spec.rb)
+
+# 1
+repo = UserRepository.new
+user = repo.all
+
+user.length # => 2
+user[0].id # => 1
+user[0].email # => chris_@hotmail.com 
+user[0].password # => 1234567890abc
+user[0].username # => toppy
+
+# 2
+repo = UserRepository.new
+
+new_user = User.new
+new_user.name = 'pencil'
+new_user.price = 1.99
+new_user.quantity = 1
+
+repo.create(item)
+create_item = repo.all
+
+create_item.last.name # => pencil
+create_item.last.price # => 1.99
+
+# 4
+repo = ItemRepository.new
+
+delete_id = 1
+repo.delete(delete_id)
+
+delete_item = repo.all
+delete_item.length # => 1
+delete_item.first.id # => 2
+
+# 5
+repo = ItemRepository.new
+
+item = repo.find(1)
+
+item.name = 'steal hammer'
+item.price = 8.99
+
+repo.update(item)
+updated_item = repo.find(1)
+
+updated_item.name # => steal hammer
+updated_item.price # => 8.99
+
+```
+## 7. Reload the SQL seeds before each test run
+
+# REPEAT BASE ON TABLES MAIN PROGRAM WANTS TO EQUIRY DATA!!!
+
+number of tables 2 (items) & (orders)
+
+```ruby
+# file: spec/item_repository_spec.rb
+
+def reset_order_table
+    seed_sql = File.read('spec/seeds_shop_manager_test.sql')
+    connection = PG.connect({ host: '127.0.0.1', dbname: 'shop_manager_test' })
+    connection.exec(seed_sql)
+end
+  
+describe OrderRepository do
+    before(:each) do 
+        reset_order_table
+    end
+end
+  # (your tests will go here).
+end
 ```
 
 ## Setup app.rb file.
