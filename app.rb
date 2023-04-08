@@ -29,7 +29,7 @@ class Application < Sinatra::Base
 
     title = params[:title]
     content = params[:content]
-    date = params[:date]
+    tags = params[:tags]
 
     repo = MessageRepository.new
     new_message = Message.new
@@ -44,16 +44,10 @@ class Application < Sinatra::Base
   end
 
   def invalid_request_parameters?
-    # Are the params nil?
-    return true if  title = params[:title] == nil ||
-                    content = params[:content] == nil ||
-                    tags = params[:tags] == nil
+    return true if params[:title].nil? || params[:title].empty? ||
+                    params[:content].nil? || params[:content].empty? ||
+                    params[:tags].nil? || params[:tags].empty?
   
-    # Are they empty strings?
-    return true if  title = params[:title] == '' ||
-                    content = params[:content] == '' ||
-                    tags = params[:tags] == ''
-
-    return false
+    false
   end
 end

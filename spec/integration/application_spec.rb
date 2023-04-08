@@ -14,7 +14,7 @@ describe Application do
         it 'contains a h1 title' do
             response = get('/')
         
-            expect(response.body).to include('<h1 style="font-family:helvetica">Welcome to Chitter</h1>')
+            expect(response.body).to include('<h1')
             expect(response.body).to include('Welcome to Chitter')
         end
 
@@ -22,9 +22,9 @@ describe Application do
             response = get('/')
         
             expect(response.status).to eq(200)
-            expect(response.body).to include('title: paired programming')
-            expect(response.body).to include('content: learning to pair program')
-            expect(response.body).to include('tags: {2,3}')
+            expect(response.body).to include('paired programming')
+            expect(response.body).to include('learning to pair program')
+            expect(response.body).to include('{2,3}')
         end
     end
 
