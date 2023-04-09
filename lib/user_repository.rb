@@ -60,6 +60,10 @@ class UserRepository
         return user
     end
   
+    
+
+
+
     def sign_in(email, submitted_password)
         user = find(email)
     

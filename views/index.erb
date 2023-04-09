@@ -65,6 +65,10 @@
                 border-radius: 5px;
                 cursor: pointer;
             }
+            .right {
+                text-align: right;
+                float: right;
+            }
             .message {
                 border: 1.2px solid #F27F60;
                 padding: 10px;
@@ -90,8 +94,11 @@
         <div class="container">
             <a href="/login">login</a> 
             <a href="/sign_up">sign up</a>
+            <div class="right">
+                <a href="/log_out">log out</a>
+            </div>
             <p>Below is the message board:</p>
-            
+
             <% @messages.each do |message| %>
                 <div class="message">
                     <h2><%= message.title %></h2>

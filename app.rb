@@ -7,7 +7,6 @@ require_relative 'lib/database_connection'
 require_relative 'lib/user_repository'
 require_relative 'lib/message_repository'
 
-
 DatabaseConnection.connect
 
 class Application < Sinatra::Base
@@ -32,20 +31,26 @@ class Application < Sinatra::Base
       return ''
     end
 
-    title = params[:title]
-    content = params[:content]
-    tags = params[:tags]
-
-    repo = MessageRepository.new
-    new_message = Message.new
-
-    new_message.title = params[:title]
-    new_message.content = params[:content]
-    new_message.tags = params[:tags]
+    if session[:user_id] == nil
+      redirect '/login' 
+    else
+      title = params[:title]
+      content = params[:content]
+      tags = params[:tags]
   
-    repo.create(new_message)
+      repo = MessageRepository.new
 
-    redirect '/'
+      new_message = Message.new
+
+      new_message.title = params[:title]
+      new_message.content = params[:content]
+      new_message.tags = params[:tags]
+      new_message.user_id = session[:user_id]
+
+      repo.create(new_message)
+  
+      redirect '/'
+    end
   end
 
   get '/sign_up' do
@@ -80,22 +85,27 @@ class Application < Sinatra::Base
     user = repo.find(email)
 
     stored_password = BCrypt::Password.new(user.password)
-
     if stored_password == password
-      # Set the user ID in session
       session[:user_id] = user.id
-
-      return erb(:logged_in)
+      redirect '/'
     else
       return erb(:login_error)
     end
+  end
+
+  get '/log_out' do
+    destroy
+    redirect '/'
   end
 
   def invalid_request_parameters?
     return true if params[:title].nil? || params[:title].empty? ||
                     params[:content].nil? || params[:content].empty? ||
                     params[:tags].nil? || params[:tags].empty?
-  
     false
   end
+
+  def destroy      
+    session[:user_id] = nil     
+  end  
 end

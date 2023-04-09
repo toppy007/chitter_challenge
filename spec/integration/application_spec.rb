@@ -29,17 +29,35 @@ describe Application do
     end
 
     context "POST /" do
-        it 'returns a new chitter message' do
-          response = post(
-            '/',
-            title: 'Learing HTML',
-            content: 'its a easy to get muddled up',
-            tags: '{2,3}',
-            user_id: 1
-          )
+        it 'returns a new chitter message if logged in' do
 
-          expect(response.status).to eq(302)
-          expect(response.body).to include('')
+            session = { user_id: 1 }
+            allow_any_instance_of(described_class).to receive(:session).and_return(session)
+            
+            response = post(
+                '/',
+                title: 'Learing HTML',
+                content: 'its a easy to get muddled up',
+                tags: '{2,3}'
+            )
+
+            expect(response.status).to eq(302)
+            expect(response.body).to include('')
+        end
+
+        it 'redirects if not logged in' do
+
+            session = {user_id: nil}
+            allow_any_instance_of(described_class).to receive(:session).and_return(session)
+            
+            response = post(
+                '/',
+                title: 'Learing HTML',
+                content: 'its a easy to get muddled up',
+                tags: '{2,3}'
+            )
+
+            expect(response.status).to eq(302)
         end
       
         it 'responds with 400 status if parameters are invalid' do
@@ -59,7 +77,7 @@ describe Application do
             response = get('/sign_up')
         
             expect(response.status).to eq 200
-            expect(response.body).to include('<h1>welcome to the sign up page</h1>')
+            expect(response.body).to include('<h1>Welcome to the Sign Up Page</h1>')
         end
 
         it "tests POST '/sign_up' " do
@@ -71,7 +89,7 @@ describe Application do
             )
         
             expect(response.status).to eq 200
-            expect(response.body).to include('<h1>welcome to the login page</h1>')
+            expect(response.body).to include('<h1>Welcome to the Login Page</h1>')
         end
     end
 
@@ -80,7 +98,7 @@ describe Application do
             response = get('/login')
         
             expect(response.status).to eq 200
-            expect(response.body).to include('<h1>welcome to the login page</h1>')
+            expect(response.body).to include('<h1>Welcome to the Login Page</h1>')
         end
 
         it "tests POST '/login' with correct password" do
@@ -89,8 +107,7 @@ describe Application do
                 email: 'chris_top@gmail.com',
                 password: 'toppyabcdefg'
             )
-            expect(response.status).to eq 200
-            expect(response.body).to include('<h1>Logged in</h1>')
+            expect(response.status).to eq 302
         end
 
         it "tests POST '/login' with incorrect password" do
@@ -101,6 +118,14 @@ describe Application do
             )
             expect(response.status).to eq 200
             expect(response.body).to include('<h1>Login error</h1>')
+        end
+    end
+
+    context "testing log out GET '/log_out' methods" do
+        it 'restest session to nil' do
+            response = get('log_out')
+
+            expect(response.status).to eq 302
         end
     end
 end
