@@ -15,7 +15,7 @@ describe Application do
             response = get('/')
         
             expect(response.body).to include('<h1')
-            expect(response.body).to include('Welcome to Chitter')
+            expect(response.body).to include('Chitter Message Board')
         end
 
         it 'displays messages from users' do

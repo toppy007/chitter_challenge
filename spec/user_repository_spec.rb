@@ -25,7 +25,15 @@ RSpec.describe UserRepository do
             expect(user[0].username).to eq 'toppy'
         end
 
-        it 'create a new user' do
+        it 'finds via email' do
+            repo = UserRepository.new
+        
+            user = repo.find('chris_@hotmail.com')
+            
+            expect(user.id).to eq(1)
+        end
+
+        it 'create a user' do
             repo = UserRepository.new
 
             new_user = User.new
@@ -34,12 +42,50 @@ RSpec.describe UserRepository do
             new_user.username = 'andy'
 
             repo.create(new_user)
-            added_user = repo.all
 
-            expect(added_user.length).to eq 4
-            expect(added_user.last.email).to eq 'andy_@gmail.com'
-            expect(added_user.last.password).to eq '1111abcde'
-            expect(added_user.last.username).to eq 'andy'
+            new_user = repo.all
+
+            expect(new_user.length).to eq 4
+            expect(new_user.last.username).to eq 'andy'
+        end
+
+
+        it 'testing sign_in, should return true' do
+            repo = UserRepository.new
+
+            new_user = User.new
+            new_user.email = 'andy_@gmail.com'
+            new_user.password = '1111abcde'
+            new_user.username = 'andy'
+            
+            repo.create(new_user)
+
+            decoded = repo.sign_in(new_user.email, new_user.password)
+
+            expect(decoded).to eq true
+        end
+
+        it 'email address does not exsits' do
+            repo = UserRepository.new
+
+            decoded = repo.sign_in('fed_@hotmail.com', 'password')
+
+            expect(decoded).to eq nil
+        end
+
+        it 'returns false if password !=' do
+            repo = UserRepository.new
+
+            new_user = User.new
+            new_user.email = 'andy_@gmail.com'
+            new_user.password = '1111abcde'
+            new_user.username = 'andy'
+            
+            repo.create(new_user)
+
+            decoded = repo.sign_in('andy_@gmail.com', 'password')
+
+            expect(decoded).to eq false
         end
     end
 end
