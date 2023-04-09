@@ -53,4 +53,54 @@ describe Application do
             expect(response.status).to eq(400)
         end
     end
+
+    context "testing GET/POST /sign_up" do
+        it "tests GET '/sign_up' " do
+            response = get('/sign_up')
+        
+            expect(response.status).to eq 200
+            expect(response.body).to include('<h1>welcome to the sign up page</h1>')
+        end
+
+        it "tests POST '/sign_up' " do
+            response = post(
+                '/sign_up',
+                email: 'chris_top@gmail.com',
+                password: 'toppyabcdefg',
+                username: 'toppy'
+            )
+        
+            expect(response.status).to eq 200
+            expect(response.body).to include('<h1>welcome to the login page</h1>')
+        end
+    end
+
+    context "testing GET/POST /login" do
+        it "tests GET '/login' " do
+            response = get('/login')
+        
+            expect(response.status).to eq 200
+            expect(response.body).to include('<h1>welcome to the login page</h1>')
+        end
+
+        it "tests POST '/login' with correct password" do
+            response = post(
+                '/login',
+                email: 'chris_top@gmail.com',
+                password: 'toppyabcdefg'
+            )
+            expect(response.status).to eq 200
+            expect(response.body).to include('<h1>Logged in</h1>')
+        end
+
+        it "tests POST '/login' with incorrect password" do
+            response = post(
+                '/login',
+                email: 'chris_top@gmail.com',
+                password: 'andyabcdefg'
+            )
+            expect(response.status).to eq 200
+            expect(response.body).to include('<h1>Login error</h1>')
+        end
+    end
 end
