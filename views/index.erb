@@ -24,7 +24,7 @@
             .container {
                 max-width: 500px;
                 background-color: #f8f8f8;
-                color: #4f4f4f4;
+                color: #063336;
                 margin: 0 auto;
                 padding: 20px;
             }
@@ -62,7 +62,6 @@
                 background-color: #F27F60;
                 color: #063336;
                 border: none;
-                border-radius: 5px;
                 cursor: pointer;
             }
             .right {
@@ -79,12 +78,36 @@
                 margin: 0 0 10px;
             }
             .message p {
-                font-size: 1.2rem;
+                font-size: 1rem;
                 margin: 0;
             }
+
             .message span {
                 font-weight: bold;
             }
+
+            select {
+                font-size: 1.2rem;
+                padding: 5px;
+                margin-bottom: 10px;
+                border: none;
+                border-bottom: 1px solid #f8f8f8;
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+            select option {
+                border: none;
+                background-color: #f8f8f8;
+                color: #063336;
+                padding: 5px;
+                font-size: 0.8rem;
+            }
+
+            select option:hover {
+                background-color: #F27F60;
+            }
+
         </style>
     </head>
     <body>
@@ -101,20 +124,27 @@
 
             <% @messages.each do |message| %>
                 <div class="message">
-                    <h2><%= message.title %></h2>
+                    <h1><%= message.title %></h2>
                     <p><%= message.content %></p>
-                    <p>Tags: <%= message.tags %></p>
-                    <p>User ID: <span><%= message.user_id %></span></p>
+                    <p>date: <%= message.created_at %></p>
+                    <p>tags: <span><%= message.tags %></span></p>
+                    <p>handle: <span><%= message.posted_by %></span></p>
                 </div>
-            <% end %>
-        
+                <% end %>
             <form action="/" method="POST">
                 <label for="title">Title:</label>
                 <input type="text" name="title" id="title">
+                
                 <label for="content">Content:</label>
-                <textarea type="text" name="content" id="content" rows='5'></textarea>
-                <label for="tags">Tags:</label>
-                <input type="text" name="tags" id="tags">
+                <textarea type="text" name="content" id="content" rows="4"></textarea>
+
+                <label for="tags">Choose tags:</label>
+                <select name="tags[]" size="3" multiple="multiple">
+                    <% @tags.each do |tag| %>
+                        <option value="<%= tag %>"><%= tag %></option>
+                    <% end %>
+                </select><br>
+
                 <input type="submit" value="Submit">
             </form>
         </div>

@@ -24,21 +24,20 @@ describe Application do
             expect(response.status).to eq(200)
             expect(response.body).to include('paired programming')
             expect(response.body).to include('learning to pair program')
-            expect(response.body).to include('{2,3}')
         end
     end
 
     context "POST /" do
         it 'returns a new chitter message if logged in' do
 
-            session = { user_id: 1 }
+            session = {user_id: '1' }
             allow_any_instance_of(described_class).to receive(:session).and_return(session)
             
             response = post(
                 '/',
                 title: 'Learing HTML',
                 content: 'its a easy to get muddled up',
-                tags: '{2,3}'
+                tags: '@mat'
             )
 
             expect(response.status).to eq(302)
@@ -54,9 +53,9 @@ describe Application do
                 '/',
                 title: 'Learing HTML',
                 content: 'its a easy to get muddled up',
-                tags: '{2,3}'
+                tags: '@mat'
             )
-
+            
             expect(response.status).to eq(302)
         end
       
@@ -85,7 +84,8 @@ describe Application do
                 '/sign_up',
                 email: 'chris_top@gmail.com',
                 password: 'toppyabcdefg',
-                username: 'toppy'
+                username: 'toppy',
+                name: 'christopher toplisek'
             )
         
             expect(response.status).to eq 200

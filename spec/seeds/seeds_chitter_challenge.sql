@@ -5,7 +5,8 @@ CREATE TABLE users (
   id SERIAL PRIMARY KEY,
   email text,
   password text,
-  username text
+  username text,
+  name text
 );
 
 -- Then the table with the foreign key first.
@@ -13,8 +14,9 @@ CREATE TABLE messages (
   id SERIAL PRIMARY KEY,
   title text,
   content text,
-  tags int[],
+  tags text,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  posted_by text,
 -- The foreign key name is always {other_table_singular}_id
   user_id int,
   constraint fk_user foreign key(user_id)

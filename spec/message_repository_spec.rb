@@ -22,8 +22,7 @@ RSpec.describe MessageRepository do
             expect(message[0].id).to eq 1 
             expect(message[0].title).to eq 'paired programming' 
             expect(message[0].content).to eq 'learning to pair program'
-            expect(message[0].tags).to eq '{2,3}'
-            expect(message[0].user_id).to eq 1
+            expect(message[0].tags).to eq '@mat'
         end
 
         it 'create a new message' do
@@ -32,9 +31,8 @@ RSpec.describe MessageRepository do
             new_message = Message.new
             new_message.title = 'my project'
             new_message.content = 'chitter challenge ongoing'
-            new_message.tags = '{2}'
-            new_message.user_id = 1
-
+            new_message.tags = '@mat'
+            new_message.posted_by = 'toppy'
 
             repo.create(new_message)
             message = repo.all
@@ -42,8 +40,8 @@ RSpec.describe MessageRepository do
             expect(message.length).to eq 4
             expect(message.last.title).to eq 'my project'
             expect(message.last.content).to eq 'chitter challenge ongoing'
-            expect(message.last.tags).to eq '{2}'
-            expect(message.last.user_id).to eq 1
+            expect(message.last.tags).to eq '@mat'
+            expect(message.last.posted_by).to eq 'toppy'
         end
     end
 end

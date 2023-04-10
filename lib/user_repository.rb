@@ -6,7 +6,7 @@ class UserRepository
         users = []
     
         # Send the SQL query and get the result set.
-        sql = 'SELECT id, email, password, username FROM users;'
+        sql = 'SELECT id, email, password, username, name FROM users;'
         result = DatabaseConnection.exec_params(sql,[])
         
         # The result set is an array of hashes.
@@ -21,6 +21,7 @@ class UserRepository
             user.email = user_data['email']
             user.password = user_data['password']
             user.username = user_data['username']
+            user.name = user_data['name']
 
             users << user
         end
@@ -32,20 +33,21 @@ class UserRepository
         encrypted_password = BCrypt::Password.create(new_user.password)
     
         sql = '
-            INSERT INTO users (email, password, username)
-            VALUES($1, $2, $3);
+            INSERT INTO users (email, password, username, name)
+            VALUES($1, $2, $3, $4);
         '
         params = [
             new_user.email,
             encrypted_password,
-            new_user.username
+            new_user.username,
+            new_user.name
         ]
 
         result = DatabaseConnection.exec_params(sql, params)
     end
 
     def find(email)
-        sql = 'SELECT id, email, password, username FROM users WHERE email = $1;'
+        sql = 'SELECT id, email, password, username, name FROM users WHERE email = $1;'
         result = DatabaseConnection.exec_params(sql, [email])
         
         return nil if result.ntuples == 0
@@ -56,13 +58,24 @@ class UserRepository
         user.email = result[0]['email']
         user.password = result[0]['password']
         user.username = result[0]['username']
+        user.name = result[0]['name']
     
         return user
     end
-  
+
+    def find_from_session(session_id)
+        sql = 'SELECT id, email, password, username, name FROM users WHERE username = $1;'
+        result = DatabaseConnection.exec_params(sql, [session_id])
+         
+        user = User.new
+        user.id = result[0]['id'].to_i
+        user.email = result[0]['email']
+        user.password = result[0]['password']
+        user.username = result[0]['username']
+        user.name = result[0]['name']
     
-
-
+        return user
+    end
 
     def sign_in(email, submitted_password)
         user = find(email)

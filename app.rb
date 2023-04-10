@@ -22,6 +22,14 @@ class Application < Sinatra::Base
   get '/' do
     repo = MessageRepository.new
     @messages = repo.all.sort_by(&:created_at).reverse
+
+    @tags = []
+    
+    user_info = UserRepository.new
+    tag = user_info.all
+    tag.each do | username |
+        @tags << "@#{username.username}"
+    end
     return erb(:index)
   end
 
@@ -31,26 +39,23 @@ class Application < Sinatra::Base
       return ''
     end
 
-    if session[:user_id] == nil
-      redirect '/login' 
-    else
-      title = params[:title]
-      content = params[:content]
-      tags = params[:tags]
-  
-      repo = MessageRepository.new
+    redirect '/login' if session[:user_id] == nil
+    
+    title = params[:title]
+    content = params[:content]
+    tags = params[:tags]
 
-      new_message = Message.new
 
-      new_message.title = params[:title]
-      new_message.content = params[:content]
-      new_message.tags = params[:tags]
-      new_message.user_id = session[:user_id]
+    repo = MessageRepository.new
+    new_message = Message.new
+    new_message.title = params[:title]
+    new_message.content = params[:content]
+    new_message.posted_by = session[:user_id] 
+    new_message.tags = params[:tags]
+    
+    repo.create(new_message)
 
-      repo.create(new_message)
-  
-      redirect '/'
-    end
+    redirect '/'
   end
 
   get '/sign_up' do
@@ -61,13 +66,15 @@ class Application < Sinatra::Base
     email = params[:email]
     password = params[:password]
     username = params[:username]
+    name = params[:name]
 
     repo = UserRepository.new
     new_user = User.new
     new_user.email = params[:email]
     new_user.password = params[:password]
     new_user.username = params[:username]   
-    
+    new_user.name = params[:name]  
+
     repo.create(new_user)
 
     return erb(:login)
@@ -86,7 +93,7 @@ class Application < Sinatra::Base
 
     stored_password = BCrypt::Password.new(user.password)
     if stored_password == password
-      session[:user_id] = user.id
+      session[:user_id] = user.username
       redirect '/'
     else
       return erb(:login_error)
@@ -100,8 +107,7 @@ class Application < Sinatra::Base
 
   def invalid_request_parameters?
     return true if params[:title].nil? || params[:title].empty? ||
-                    params[:content].nil? || params[:content].empty? ||
-                    params[:tags].nil? || params[:tags].empty?
+                    params[:content].nil? || params[:content].empty? 
     false
   end
 

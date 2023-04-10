@@ -33,6 +33,14 @@ RSpec.describe UserRepository do
             expect(user.id).to eq(1)
         end
 
+        it 'finds via session_id' do
+            repo = UserRepository.new
+        
+            user = repo.find_from_session('toppy')
+            
+            expect(user.id).to eq(1)
+        end
+
         it 'create a user' do
             repo = UserRepository.new
 
